@@ -1,0 +1,23 @@
+{
+  "redis":{
+    "host":"localhost",
+    "port":6379,
+    "db":0
+  },
+  "mongo":{
+    "host":"localhost",
+    "port":27017,
+    "db":"queue"
+  },
+  "database":{
+    "host":"db.s3db",
+    "port":""
+  },
+  "redisKey":{
+    "crawledGoods":"goodsInfo"
+  },
+  "basic":{
+    "crawlInterval":3600,
+    "searchUrlFormat":"http://gouwu.sogou.com/shop?query=#keyword&isAbroad=0&pricestart=#price1&priceLowest=0&priceend=#price2&priceDown=0&display=grid&rank=5&ad=0&sourceid=sr_bar_dl_mr&interV="
+  }
+}
