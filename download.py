@@ -80,7 +80,7 @@ class SeleniumDownloader(object):
     def get_items(self, url, goods_id,func):
         try:
             page_source = self.get_page_source(url)
-            func(page_source,goods_id)
+            func(url,page_source,goods_id)
         except Exception as e:
             print e
 

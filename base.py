@@ -23,11 +23,14 @@ class MongoQueue(object):
         )
         return True if record else False
 
-    def push(self, url ,goodsId):
-        try:
-            self.db.crawl_queue.insert({"_id": url, "status": self.OUTSTANDING,"goodsId":goodsId})
-        except errors.DuplicateKeyError as e:
-            pass
+    def push(self, *args):
+         try:
+            self.db.crawl_queue.insert({"_id": args[0], "status": self.OUTSTANDING,"goodsId":args[1],"cost":args[2]})
+            print 'success...'
+         except errors.DuplicateKeyError as e:
+             pass
+         except Exception as e:
+             print e
 
     def pop(self):
         record = self.db.crawl_queue.find_and_modify(
@@ -35,7 +38,7 @@ class MongoQueue(object):
             update={"$set": {"status": self.PROCESSING, "timestamp": datetime.now()}}
         )
         if record:
-            return record["_id"],record["goodsId"]
+            return record["_id"],record["goodsId"],record["cost"]
         else:
             self.repair()
             raise KeyError
@@ -46,7 +49,8 @@ class MongoQueue(object):
             return record["_id"]
 
     def complete(self, url):
-        self.db.crawl_queue.update({"_id": url},{"$set": {"status": self.COMPLETE}})
+        #self.db.crawl_queue.update({"_id": url},{"$set": {"status": self.COMPLETE}})
+        self.db.crawl_queue.find_one_and_delete({"_id":url})
 
     def repair(self):
         record = self.db.crawl_queue.find_and_modify(

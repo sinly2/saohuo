@@ -38,7 +38,7 @@ class Scanner(object):
                             search_url = self.generate_url(keywords,origin_price)
                             print search_url
                             try:
-                                self.queue.push(search_url, goods_id)
+                                self.queue.push(search_url, goods_id,origin_price)
                             except Exception as e:
                                 print e
                                 continue
@@ -53,7 +53,7 @@ class Scanner(object):
     def generate_url(self,keywords,origin_price):
         search_url = self.search_url
         search_url = search_url.replace("#keyword",quote(keywords.encode("utf8")))
-        #search_url = search_url.replace("#price1", str(int(origin_price)/3))
+        search_url = search_url.replace("#price1", str(int(origin_price)/3))
         search_url = search_url.replace("#price2", str(int(origin_price)))
         return search_url
 

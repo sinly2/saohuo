@@ -23,24 +23,27 @@ class Downloader(threading.Thread):
     def run(self):
         while True:
             try:
-                url,goods_id = self.queue.pop()
-                print url,goods_id
+                url,goods_id,origin_price = self.queue.pop()
+                print url,goods_id,origin_price
             except:
                 pass
             else:
                 with SeleniumDownloader(proxy=None) as browser:
                     #browser.get_page_source(url,goods_id)
                     browser.get_items(url,goods_id,Downloader.parse_func)
-            time.sleep(100)
+            time.sleep(2)
 
 
     @staticmethod
-    def parse_func(page_source,goods_id):
+    def parse_func(url,page_source,goods_id):
+        # 解析网页存到redis给process消费
         redis_conn = get_redis()
         tree = lxml.html.fromstring(page_source)
         divs = tree.cssselect("div.s_result_item")
         result = []
         lowest_price = 0.0
+        goods_url = ""
+        last_search_url = url
         if divs:
             for div in divs:
                 try:
@@ -49,13 +52,14 @@ class Downloader(threading.Thread):
                     price = div.cssselect("div.item_price > em")[0].text_content().encode("utf8").replace("¥","").replace(" ","")
                     if lowest_price == 0.0 or lowest_price > float(price):
                         lowest_price = float(price)
+                        goods_url = url
                     result.append({url:price})
                 except:
                     pass
             if result:
                 result.append({"lowest_price":lowest_price})
             print result
-            redis_conn.lpush(CONFIG["redisKey"]["crawledGoods"],json.dumps({"goodsId":goods_id, "metadata":result}))
+        redis_conn.lpush(CONFIG["redisKey"]["crawledGoods"],json.dumps({"goodsId":goods_id,"goodsUrl":goods_url, "lastSearchUrl":last_search_url,"metadata":result}))
         return result
 
 
